@@ -1,0 +1,6 @@
+[{"id":1,"name":"AUTOR","color":"red-11"},
+{"id":2,"name":"TYTUŁ","color":"blue-11"},
+{"id":3,"name":"NUMER_CZASOPISMA","color":"deep-purple-11"},
+{"id":4,"name":"CZASOPISMO","color":"amber-11"},{"id":5,"name":"RODZAJ_DZIELA_ZALEZNEGO","color":"teal-11"},
+{"id":6,"name":"MIEJSCE_WYDANIA","color":"light-green-11"},{"id":7,"name":"WYDAWNICTWO","color":"deep-orange-11"},{"id":8,"name":"DATA_WYDANIA","color":"pink-11"},
+{"id":9,"name":"WYDANIE","color":"light-blue-11"},{"id":10,"name":"ADNOTACJA","color":"lime-11"},{"id":11,"name":"OPIS_FIZYCZNY","color":"brown-11"}]
