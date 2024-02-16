@@ -3,7 +3,8 @@ import torch.optim as optim
 from torch.utils.data import DataLoader, TensorDataset
 from model import TextCNN
 from data_loader import load_data
-from utils import evaluate_model
+from utils import evaluate_model, save_model, save_tokenizer, save_label_encoder
+
 
 def train_model(file_path):
     X_train, X_test, y_train, y_test, word_index = load_data(file_path)
@@ -39,6 +40,16 @@ def train_model(file_path):
     #Evaluation
     accuracy = evaluate_model(model, test_loader)
     print(f'Accuracy: {accuracy}')
+
+
+model_path = 'models/saved_models/model.pth'
+tokenizer_path = 'models/tokenizers/tokenizer.pickle'
+label_encoder_path = 'models/label_encoders/label_encoder.pickle'
+
+save_model(model, model_path)
+save_tokenizer(tokenizer, tokenizer_path)
+save_label_encoder(label_encoder, label_encoder_path)
+
 
 if __name__ == "__main__":
     file_path = 'path.csv'  
