@@ -1,6 +1,26 @@
 import torch
 import pickle
 from sklearn.metrics import precision_score, recall_score, f1_score
+from keras.preprocessing.sequence import pad_sequences
+
+
+def predict_text_class_with_labels(texts, model, tokenizer, max_length=128):
+
+    sequences = tokenizer.texts_to_sequences(texts)
+    padded_sequences = pad_sequences(sequences, maxlen=max_length, padding='post', truncating='post')
+    input_tensor = torch.tensor(padded_sequences, dtype=torch.long)
+    
+    # Prediction
+    model.eval()
+    with torch.no_grad():
+        outputs = model(input_tensor)
+        predictions = torch.argmax(outputs, dim=1).numpy()
+    labels = ['artykuł', 'książka']
+    predicted_labels = [labels[pred] for pred in predictions]
+    
+    return predicted_labels
+
+
 
 #Functions for model evaluation
 
