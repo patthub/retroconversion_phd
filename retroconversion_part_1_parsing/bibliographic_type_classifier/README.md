@@ -36,4 +36,4 @@ pip install -r requirements.txt
 
 To train the model with your data, ensure your dataset is in a CSV format with the required columns (`Rekord` for text and `Etykiety` for labels)
 
-## This code is part of a PhD project in digital humanities 
+### This code is part of a PhD project in digital humanities 
