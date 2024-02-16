@@ -56,8 +56,8 @@ from utils import predict_text_class_with_labels, load_model, load_tokenizer
 
 def apply_model_to_dataframe(file_path, model_path, tokenizer_path):
     df = pd.read_csv(file_path)
-    model = load_model(TextCNN(vocab_size, embed_dim, num_classes, kernel_sizes, num_filters), model_path)  # Załaduj model
-    tokenizer = load_tokenizer(tokenizer_path)  # Załaduj tokenizer
+    model = load_model(TextCNN(vocab_size, embed_dim, num_classes, kernel_sizes, num_filters), model_path)  
+    tokenizer = load_tokenizer(tokenizer_path)  
     
     df['predicted_class'] = predict_text_class_with_labels(df['text_column'].tolist(), model, tokenizer)
     df.to_csv('path_to_save_predictions.csv', index=False)
