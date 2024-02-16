@@ -1,4 +1,5 @@
 import torch
+import pickle
 
 def evaluate_model(model, data_loader):
     model.eval()
@@ -12,3 +13,30 @@ def evaluate_model(model, data_loader):
             correct += (predicted == labels).sum().item()
     accuracy = 100 * correct / total
     return accuracy
+
+def save_model(model, model_path):
+    torch.save(model.state_dict(), model_path)
+
+def load_model(model, model_path):
+    model.load_state_dict(torch.load(model_path))
+    model.eval()
+    return model
+
+def save_tokenizer(tokenizer, tokenizer_path):
+    with open(tokenizer_path, 'wb') as handle:
+        pickle.dump(tokenizer, handle, protocol=pickle.HIGHEST_PROTOCOL)
+
+def load_tokenizer(tokenizer_path):
+    with open(tokenizer_path, 'rb') as handle:
+        tokenizer = pickle.load(handle)
+    return tokenizer
+
+def save_label_encoder(label_encoder, label_encoder_path):
+    with open(label_encoder_path, 'wb') as handle:
+        pickle.dump(label_encoder, handle, protocol=pickle.HIGHEST_PROTOCOL)
+
+def load_label_encoder(label_encoder_path):
+    with open(label_encoder_path, 'rb') as handle:
+        label_encoder = pickle.load(handle)
+    return label_encoder
+
