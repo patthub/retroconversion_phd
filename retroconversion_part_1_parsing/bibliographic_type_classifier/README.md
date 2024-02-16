@@ -4,6 +4,17 @@
 
 This project implements a Convolutional Neural Network (CNN) for bibliographic record classification purposes. It uses PyTorch for model training and evaluation, with data preprocessing steps involving pandas, scikit-learn, and Keras.
 
+## Model Performance
+
+Below is the performance of the CNN model on the test dataset:
+
+| Metric    | Value  |
+|-----------|--------|
+| Precision | 0.9056 |
+| Recall    | 0.8889 |
+| F1 Score  | 0.8836 |
+
+
 ## Installation
 
 To set up your environment to run the code, follow these steps:
