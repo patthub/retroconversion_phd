@@ -63,7 +63,7 @@ def apply_model_to_dataframe(file_path, model_path, tokenizer_path):
     df.to_csv('path_to_save_predictions.csv', index=False)
 
 if __name__ == "__main__":
-    file_path = 'data/raw/your_dataset.csv'  
+    file_path = 'data/our_dataset.csv'  
     model_path = 'models/saved_models/your_model.pth' 
     tokenizer_path = 'models/tokenizers/your_tokenizer.pickle' 
     apply_model_to_dataframe(file_path, model_path, tokenizer_path)
