@@ -1,5 +1,8 @@
 import torch
 import pickle
+from sklearn.metrics import precision_score, recall_score, f1_score
+
+#Functions for model evaluation
 
 def evaluate_model(model, data_loader):
     model.eval()
@@ -13,6 +16,27 @@ def evaluate_model(model, data_loader):
             correct += (predicted == labels).sum().item()
     accuracy = 100 * correct / total
     return accuracy
+
+
+def evaluate_metrics(model, data_loader):
+    model.eval()
+    true_labels = []
+    pred_labels = []
+    
+    with torch.no_grad():
+        for texts, labels in data_loader:
+            outputs = model(texts)
+            _, predicted = torch.max(outputs, dim=1)
+            true_labels.extend(labels.cpu().numpy())
+            pred_labels.extend(predicted.cpu().numpy())
+    
+    precision = precision_score(true_labels, pred_labels, average='weighted')
+    recall = recall_score(true_labels, pred_labels, average='weighted')
+    f1 = f1_score(true_labels, pred_labels, average='weighted')
+    
+    return precision, recall, f1
+
+#Functions for model and other related elements saving and loading
 
 def save_model(model, model_path):
     torch.save(model.state_dict(), model_path)
