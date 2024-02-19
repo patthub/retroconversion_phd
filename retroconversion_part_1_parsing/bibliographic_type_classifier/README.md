@@ -1,4 +1,4 @@
-# Bibliographic record type Classification with CNN
+# Bibliographic record type classification with CNN
 
 ## Project Overview
 
