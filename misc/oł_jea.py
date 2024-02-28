@@ -15,31 +15,93 @@ def readFile(path):
     main_file = pd.DataFrame(open(path, "r").readlines(), columns=['Record'])
     return main_file
 
-
 def extract_and_validate_order_numbers(df: pd.DataFrame) -> pd.DataFrame:
-    # Ekstrakcja numerów porządkowych z początku wierszy
     df['OrderNumber'] = df['Record'].str.extract(r'^(\d{1,5})').astype(float)
-
-    # Inicjalizacja kolumny do sprawdzenia poprawności kolejności
     df['ValidOrder'] = True
+    df['Hasło przedmiotowe'] = np.nan  # Inicjalizacja nowej kolumny
+
+    def is_mostly_uppercase(text):
+        letters = [char for char in text if char.isalpha()]
+        if not letters:
+            return False
+        uppercase_letters = sum(1 for char in letters if char.isupper())
+        return uppercase_letters / len(letters) > 0.5
 
     last_valid_order = None
     for index, row in df.iterrows():
         if pd.isna(row['OrderNumber']):
-            continue  # Pominięcie wierszy bez numeru porządkowego
+            if is_mostly_uppercase(row['Record']):
+                df.at[index, 'Hasło przedmiotowe'] = row['Record']
+            continue
         if last_valid_order is None:
             last_valid_order = row['OrderNumber']
         elif 0 < row['OrderNumber'] - last_valid_order <= 5:
             last_valid_order = row['OrderNumber']
         else:
-            df.at[index, 'ValidOrder'] = False  # Oznaczenie niepoprawnej kolejności
-            df.at[index, 'OrderNumber'] = np.nan  # Usunięcie niepoprawnego numeru porządkowego
+            df.at[index, 'ValidOrder'] = False
+            df.at[index, 'OrderNumber'] = np.nan
 
     return df
 
-# Przykładowe wywołanie funkcji
-path = '/content/1972(2).txt'  # Zastąp 'ścieżka_do_pliku.txt' rzeczywistą ścieżką do pliku
+def merge_rows_based_on_order_number(df):
+    df['OrderNumber'].fillna(method='ffill', inplace=True)
+
+    # Agregacja kolumny 'Record'
+    record_agg = df.groupby('OrderNumber')['Record'].apply(lambda x: ' '.join(x.astype(str)))
+
+    # Agregacja pozostałych kolumn z zachowaniem wartości niebędących NaN (jeśli to możliwe)
+    other_cols_agg = df.groupby('OrderNumber').agg(lambda x: x.dropna().unique().tolist())
+
+    # Połączenie wyników
+    grouped_df = pd.DataFrame(record_agg).join(other_cols_agg.drop(columns=['Record']))
+
+    # Przekształcenie list na pojedyncze wartości tam, gdzie to możliwe
+    for col in grouped_df.columns:
+        grouped_df[col] = grouped_df[col].apply(lambda x: x[0] if len(x) == 1 else x)
+
+    return grouped_df.reset_index()
+
+
+def split_rows_by_patterns(df, column, patterns):
+    # Kompilacja wzorców w jeden regex
+    pattern = '|'.join(patterns)
+
+    new_rows = []
+    for index, row in df.iterrows():
+        # Dzielenie tekstu z kolumny na podstawie wzorców
+        parts = re.split(pattern, row[column])
+        for i, part in enumerate(parts):
+            new_row = {}
+            for col in df.columns:
+                # Dla pierwszego podzielonego fragmentu zachowaj oryginalne wartości, dla reszty ustaw NaN
+                new_row[col] = row[col] if i == 0 else np.nan
+            new_row[column] = part  # Aktualizacja kolumny, według której dzielimy, na podzielony fragment
+            new_rows.append(new_row)
+
+    # Tworzenie nowego DataFrame na podstawie listy nowych wierszy
+    new_df = pd.DataFrame(new_rows)
+    return new_df
+
+
+path = '/content/1972(2).txt'
+
+PATTERN_SPLIT1 = "\\.\\s{0,1}[—-]"
+PATTERN_SPLIT2 = "(?=;(?![^(]*\)))"
+PATTERN_SPLIT3 = "(?=\[?\/odp\.\]?)"
+PATTERN_SPLIT4 = "(?=\[?\/polem\.\]?)"
+PATTERN_SPLIT5 = "(?=\[?nawiąz\.\]?)"
+PATTERN_SPLIT6 = "(?=Rec\.\:)"
+PATTERNS = [PATTERN_SPLIT1, PATTERN_SPLIT2, PATTERN_SPLIT3, PATTERN_SPLIT4, PATTERN_SPLIT5, PATTERN_SPLIT6]
+
+
 df = readFile(path)
 df_validated = extract_and_validate_order_numbers(df)
-
-df_validated
+df_grouped = merge_rows_based_on_order_number(df_validated)
+df_grouped['Hasło'] = df_grouped['Hasło przedmiotowe'].shift(1)
+df_grouped['Record'] = df_grouped.apply(lambda row: row['Record'].replace(str(row['Hasło przedmiotowe']), ""), axis=1)
+df_grouped["Całostka"] = df_grouped['Record']
+df_splitted = split_rows_by_patterns(df_grouped,"Record", PATTERNS)
+df_splitted = df_splitted.drop("Hasło przedmiotowe", axis = 1)
+df_splitted['OrderNumber'].fillna(method='ffill', inplace=True)
+df_splitted["Całostka"].fillna(method='ffill', inplace=True)
+df_splitted['Record'] = df_splitted['Record'].str.replace(r'^\d{1,5}\s*\.?', '', regex=True).str.strip(" .;\t\n")
